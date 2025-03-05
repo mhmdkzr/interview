@@ -1,0 +1,24 @@
+version: "3.7"
+services:
+  redis:
+    image: redis:latest
+    volumes:
+      - orm_data_redis:/data
+    ports:
+      - "4000:6379"
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "4001:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=9xz3jrd8wf
+      - MYSQL_DATABASE=ice_db
+      - MYSQL_USER=ice_user
+      - MYSQL_PASSWORD=9xz3jrd8wf
+    volumes:
+      - orm_data_mysql:/var/lib/mysql
+
+
+volumes:
+  orm_data_mysql:
+  orm_data_redis:
