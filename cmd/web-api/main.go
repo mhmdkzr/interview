@@ -1,26 +1,34 @@
 package main
 
 import (
-	"interview/internal/controllers"
-	"interview/internal/db"
-	"net/http"
+	"embed"
+	"interview/internal/api"
+	"interview/internal/config"
+	"interview/internal/repo"
+	"log"
 
-	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
+//go:embed templates
+var templateFS embed.FS
+
 func main() {
-	db.MigrateDatabase()
-
-	ginEngine := gin.Default()
-
-	var taxController controllers.TaxController
-	ginEngine.GET("/", taxController.ShowAddItemForm)
-	ginEngine.POST("/add-item", taxController.AddItem)
-	ginEngine.GET("/remove-cart-item", taxController.DeleteCartItem)
-	srv := &http.Server{
-		Addr:    ":8088",
-		Handler: ginEngine,
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
 	}
 
-	srv.ListenAndServe()
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+	// Initialize database
+	db, err := repo.InitDatabase(*cfg)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	api.InitAPI(db, templateFS, *cfg)
 }
