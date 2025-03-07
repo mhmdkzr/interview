@@ -294,19 +294,10 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 
 // GetProductPrice returns the price of a product by name.
 func (h *CartHandler) GetProductPrice(name string) (float64, error) {
-	if h.productPrices != nil {
-		price, ok := h.productPrices[name]
-		if !ok {
-			return 0, fmt.Errorf("product not found: %s", name)
-		}
-		return price, nil
-	}
-
 	price, ok := h.productPrices[name]
 	if !ok {
 		return 0, fmt.Errorf("product not found: %s", name)
 	}
-
 	return price, nil
 }
 
