@@ -48,7 +48,7 @@ type (
 
 // InitAPI initializes and starts the HTTP server.
 func InitAPI(db *gorm.DB, templateFS embed.FS, config config.Config) {
-	handler := NewCartHandler(db, templateFS, config)
+	handler := NewCartHandler(db, templateFS, config, "templates/*.html")
 	router := gin.Default()
 
 	// Add session middleware with proper duration enforcement
@@ -112,8 +112,8 @@ func InitAPI(db *gorm.DB, templateFS embed.FS, config config.Config) {
 }
 
 // NewCartHandler creates a new CartHandler with the given dependencies.
-func NewCartHandler(db *gorm.DB, templateFS embed.FS, config config.Config) *CartHandler {
-	tpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
+func NewCartHandler(db *gorm.DB, templateFS embed.FS, config config.Config, pattern string) *CartHandler {
+	tpl := template.Must(template.ParseFS(templateFS, pattern))
 
 	// Default prices for development and testing
 	defaultPrices := map[string]float64{
