@@ -265,14 +265,6 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 		return
 	}
 
-	// Validate cart ownership
-	if userCart.SessionID != sessionID.(string) {
-		session.AddFlash("Unauthorized cart access")
-		session.Save()
-		c.Redirect(http.StatusFound, "/")
-		return
-	}
-
 	// Validate item belongs to cart
 	item, err := h.repo.GetCartItem(userCart.ID, uint(itemID))
 	if err != nil || item == nil {
