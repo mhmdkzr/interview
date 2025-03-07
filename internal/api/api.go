@@ -373,3 +373,7 @@ func sanitizeProductName(name string) string {
 func isValidProduct(name string) bool {
 	return name == "shoe" || name == "purse" || name == "bag" || name == "watch"
 }
+
+func (h *CartHandler) GetRepo() *repo.Repository {
+	return h.repo
+}
