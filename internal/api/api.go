@@ -12,7 +12,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-contrib/sessions"
 	gormSessions "github.com/gin-contrib/sessions/gorm"
@@ -62,29 +61,6 @@ func InitAPI(db *gorm.DB, templateFS embed.FS, config config.Config) {
 	})
 
 	router.Use(sessions.Sessions(config.SessionName, store))
-
-	// Add session cleanup middleware
-	router.Use(func(c *gin.Context) {
-		session := sessions.Default(c)
-		// Check session age
-		created := session.Get("created")
-		if created == nil {
-			session.Set("created", time.Now().Unix())
-			if err := session.Save(); err != nil {
-				log.Printf("Error saving session: %v", err)
-			}
-		} else if time.Now().Unix()-created.(int64) > 3600 {
-			// Session expired
-			session.Clear()
-			if err := session.Save(); err != nil {
-				log.Printf("Error saving session after clearing: %v", err)
-			}
-			c.Redirect(http.StatusFound, "/")
-			c.Abort()
-			return
-		}
-		c.Next()
-	})
 
 	// CSRF Protection
 	csrfMiddleware := csrf.Protect(
