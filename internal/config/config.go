@@ -7,14 +7,22 @@ import (
 
 // Config holds all configuration values for the application.
 type Config struct {
-	DBHost        string
-	DBPort        string
-	DBUser        string
-	DBPassword    string
-	DBName        string
+	// DBHost is the hostname of the MySQL database server
+	DBHost string
+	// DBPort is the port number of the MySQL database server
+	DBPort string
+	// DBUser is the username for connecting to the MySQL database
+	DBUser string
+	// DBPassword is the password for connecting to the MySQL database
+	DBPassword string
+	// DBName is the name of the MySQL database to use
+	DBName string
+	// SessionSecret is used to encrypt session data and generate CSRF tokens
 	SessionSecret string
-	SessionName   string
-	APIPort       string
+	// SessionName is the name of the session cookie
+	SessionName string
+	// APIPort is the port number on which the HTTP server will listen
+	APIPort string
 }
 
 // Load reads configuration from environment variables and validates them.
