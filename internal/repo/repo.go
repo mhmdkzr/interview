@@ -161,3 +161,12 @@ func (r *Repository) GetExistingCart(sessionID string) (*cartpkg.Cart, error) {
 	}
 	return &c, nil
 }
+
+func (r *Repository) GetAllCarts() ([]*cartpkg.Cart, error) {
+	var carts []*cartpkg.Cart
+	result := r.db.Preload("CartItems").Find(&carts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return carts, nil
+}
