@@ -115,7 +115,9 @@ func (h *CartHandler) ShowCart(c *gin.Context) {
 	flashes := session.Flashes()
 	if len(flashes) > 0 {
 		data.Error = flashes[0].(string)
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 	}
 
 	// Get or create a unique session ID
@@ -163,27 +165,22 @@ func generateSessionID() (string, error) {
 func (h *CartHandler) AddItem(c *gin.Context) {
 	session := sessions.Default(c)
 
-	product := sanitizeProductName(c.PostForm("product"))
-	quantityStr := c.PostForm("quantity")
-
-	if product == "" {
-		session.AddFlash("Please select a product")
-		session.Save()
-		c.Redirect(http.StatusFound, "/")
-		return
-	}
-
-	// Validate product name against allowed list
+	product := c.PostForm("product")
 	if !isValidProduct(product) {
 		session.AddFlash("Invalid product selected")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
 
+	quantityStr := c.PostForm("quantity")
 	if quantityStr == "" {
 		session.AddFlash("Please enter a quantity")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -191,7 +188,9 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	quantity, err := strconv.Atoi(quantityStr)
 	if err != nil || quantity < 1 {
 		session.AddFlash("Quantity must be a valid number greater than 0")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -199,7 +198,9 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	price, err := h.GetProductPrice(product)
 	if err != nil {
 		session.AddFlash(err.Error())
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -207,7 +208,9 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	sessionID := session.Get("session_id")
 	if sessionID == nil {
 		session.AddFlash("Invalid session")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -215,21 +218,18 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	userCart, err := h.repo.GetOrCreateCart(sessionID.(string))
 	if err != nil {
 		session.AddFlash("Failed to load cart")
-		session.Save()
-		c.Redirect(http.StatusFound, "/")
-		return
-	}
-
-	if userCart.SessionID != sessionID.(string) {
-		session.AddFlash("Unauthorized cart access")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
 
 	if err := h.repo.AddCartItem(userCart.ID, product, quantity, price); err != nil {
 		session.AddFlash("Failed to add item to cart")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -244,7 +244,9 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 	itemID, err := strconv.ParseUint(c.PostForm("cart_item_id"), 10, 32)
 	if err != nil {
 		session.AddFlash("Invalid item ID")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -252,7 +254,9 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 	sessionID := session.Get("session_id")
 	if sessionID == nil {
 		session.AddFlash("Invalid session")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -260,7 +264,9 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 	userCart, err := h.repo.GetExistingCart(sessionID.(string))
 	if err != nil {
 		session.AddFlash("Cart not found")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -269,14 +275,18 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 	item, err := h.repo.GetCartItem(userCart.ID, uint(itemID))
 	if err != nil || item == nil {
 		session.AddFlash("Item not found")
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
 
 	if err := h.repo.RemoveCartItem(userCart.ID, uint(itemID)); err != nil {
 		session.AddFlash(err.Error())
-		session.Save()
+		if err := session.Save(); err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
