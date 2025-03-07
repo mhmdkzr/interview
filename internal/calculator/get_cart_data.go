@@ -2,12 +2,13 @@ package calculator
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"html/template"
-	db2 "interview/pkg/db"
-	"interview/pkg/entity"
+	db2 "interview/internal/db"
+	"interview/internal/entity"
 	"log"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetCartData(c *gin.Context) {

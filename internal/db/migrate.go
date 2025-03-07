@@ -1,6 +1,6 @@
 package db
 
-import "interview/pkg/entity"
+import "interview/internal/entity"
 
 func MigrateDatabase() {
 	db := GetDatabase()

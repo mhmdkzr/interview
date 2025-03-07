@@ -3,13 +3,14 @@ package calculator
 import (
 	"errors"
 	"fmt"
+	db2 "interview/internal/db"
+	"interview/internal/entity"
+	"log"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
-	db2 "interview/pkg/db"
-	"interview/pkg/entity"
-	"log"
-	"strconv"
 )
 
 var itemPriceMapping = map[string]float64{

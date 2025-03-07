@@ -2,10 +2,11 @@ package calculator
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	db2 "interview/pkg/db"
-	"interview/pkg/entity"
+	db2 "interview/internal/db"
+	"interview/internal/entity"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func DeleteCartItem(c *gin.Context) {
