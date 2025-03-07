@@ -146,14 +146,22 @@ func (h *CartHandler) ShowCart(c *gin.Context) {
 	sessionID := session.Get("session_id")
 	if sessionID == nil {
 		// Generate a new unique session ID
-		sessionID = generateSessionID()
-		session.Set("session_id", sessionID)
+		newSessionID, err := generateSessionID()
+		if err != nil {
+			log.Printf("Failed to generate session ID: %v", err)
+			data.Error = "Failed to create session"
+			h.RenderTemplate(c, data)
+			return
+		}
+
+		session.Set("session_id", newSessionID)
 		if err := session.Save(); err != nil {
 			log.Printf("Failed to save session: %v", err)
 			data.Error = "Failed to create session"
 			h.RenderTemplate(c, data)
 			return
 		}
+		sessionID = newSessionID
 	}
 
 	cart, err := h.repo.GetOrCreateCart(sessionID.(string))
@@ -166,13 +174,13 @@ func (h *CartHandler) ShowCart(c *gin.Context) {
 	h.RenderTemplate(c, data)
 }
 
-func generateSessionID() string {
+func generateSessionID() (string, error) {
 	// Generate a random session ID using crypto/rand
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
-		return fmt.Sprintf("%d", time.Now().UnixNano())
+		return "", fmt.Errorf("failed to generate session ID: %w", err)
 	}
-	return fmt.Sprintf("%x", b)
+	return fmt.Sprintf("%x", b), nil
 }
 
 // AddItem adds a product to the user's cart.
@@ -236,7 +244,6 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	// Validate cart ownership
 	if userCart.SessionID != sessionID.(string) {
 		session.AddFlash("Unauthorized cart access")
 		session.Save()
